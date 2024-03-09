@@ -15,17 +15,17 @@ export interface Todo {
   deleted: boolean;
 }
 
-const getTasksFromLocalStorage = (): Todo[] => {
-  const storedTasks = localStorage.getItem("tasks");
-  return storedTasks ? JSON.parse(storedTasks) : [];
-};
+// const getTasksFromLocalStorage = (): Todo[] => {
+//   const storedTasks = localStorage.getItem("tasks");
+//   return storedTasks ? JSON.parse(storedTasks) : [];
+// };
 
-const saveTasksToLocalStorage = (tasks: Todo[]): void => {
-  localStorage.setItem("tasks", JSON.stringify(tasks));
-};
+// const saveTasksToLocalStorage = (tasks: Todo[]): void => {
+//   localStorage.setItem("tasks", JSON.stringify(tasks));
+// };
 
 const TodoList = () => {
-  const [todos, setTodos] = useState<Todo[]>(getTasksFromLocalStorage());
+  const [todos, setTodos] = useState<Todo[]>([]);
   const [selectedLength, setSelectedLength] = useState<number>(0);
   const [inputValue, setInputValue] = useState<string>("");
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
@@ -33,8 +33,19 @@ const TodoList = () => {
   const [taskToDelete, setTaskToDelete] = useState<Todo | null>(null);
 
   useEffect(() => {
-    saveTasksToLocalStorage(todos);
-    setSelectedLength(todos.filter((todo) => !todo.deleted).length);
+    const storedTodos = localStorage.getItem("tasks");
+
+    if (storedTodos && todos.length === 0) {
+      setTodos(JSON.parse(storedTodos));
+    }
+  }, []);
+
+  useEffect(() => {
+    if (todos.length > 0) {
+      localStorage.setItem("tasks", JSON.stringify(todos));
+    } else {
+      localStorage.setItem("tasks", "");
+    }
   }, [todos]);
 
   const addTodo = () => {
@@ -93,7 +104,7 @@ const TodoList = () => {
 
   const renderTodos = (status: string) => {
     if (status === "all") {
-      return todos
+      let filtered = todos
         .filter((todo) => !todo.deleted)
         .map((todo) => (
           <Task
@@ -102,8 +113,11 @@ const TodoList = () => {
             handlers={{ toggleCompletion, deleteTodo, openEditModal }}
           />
         ));
+
+      setSelectedLength(filtered.length);
+      return filtered;
     } else {
-      return todos
+      let filtered = todos
         .filter(
           (todo) =>
             (status === "completed" ? todo.completed : !todo.completed) &&
@@ -116,6 +130,8 @@ const TodoList = () => {
             handlers={{ toggleCompletion, deleteTodo, openEditModal }}
           />
         ));
+      setSelectedLength(filtered.length);
+      return filtered;
     }
   };
 
