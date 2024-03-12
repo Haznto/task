@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { createContext, Dispatch, SetStateAction } from "react";
 import {
   styled,
   alpha,
@@ -17,7 +18,10 @@ import SearchIcon from "@mui/icons-material/Search";
 import Brightness4Icon from "@mui/icons-material/Brightness4";
 import Brightness7Icon from "@mui/icons-material/Brightness7";
 import { useTheme } from "@mui/material/styles";
-
+import { SearchContext } from "./ThemeProviderUp";
+interface SearchContextTypeTwo {
+  setSearch: Dispatch<SetStateAction<string>>;
+}
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
   borderRadius: theme.shape.borderRadius,
@@ -71,12 +75,17 @@ const darkTheme = createTheme({
   },
 });
 
-export default function Navbar() {
+export default function Navbar({ setMode, mode }: any) {
   const theme = useTheme();
   const [darkMode, setDarkMode] = React.useState(false);
+  const { setSearch } = React.useContext(SearchContext) as SearchContextTypeTwo;
 
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearch(event.target.value);
+  };
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);
+    setMode(mode === "light" ? "dark" : "light");
   };
 
   return (
@@ -108,6 +117,7 @@ export default function Navbar() {
               <StyledInputBase
                 placeholder="Search…"
                 inputProps={{ "aria-label": "search" }}
+                onChange={handleSearchChange}
               />
             </Search>
             <IconButton color="inherit" onClick={toggleDarkMode}>

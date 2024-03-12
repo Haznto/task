@@ -1,11 +1,13 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { TextField, Button, Box } from "@mui/material";
 
 import TasksGrid from "./TasksGrid";
 import EditModel from "./EditModel";
 import DeleteModel from "./DeleteModel";
 import Task from "./Task";
+import { SearchContext } from "./ThemeProviderUp";
 
 export interface Todo {
   id: number;
@@ -14,7 +16,9 @@ export interface Todo {
   completed: boolean;
   deleted: boolean;
 }
-
+interface SearchContextType {
+  search: string;
+}
 // const getTasksFromLocalStorage = (): Todo[] => {
 //   const storedTasks = localStorage.getItem("tasks");
 //   return storedTasks ? JSON.parse(storedTasks) : [];
@@ -31,7 +35,8 @@ const TodoList = () => {
   const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
   const [descriptionInput, setDescriptionInput] = useState<string>("");
   const [taskToDelete, setTaskToDelete] = useState<Todo | null>(null);
-
+  const { search } = useContext(SearchContext) as SearchContextType;
+  console.log(search);
   useEffect(() => {
     const storedTodos = localStorage.getItem("tasks");
 
@@ -103,36 +108,29 @@ const TodoList = () => {
   };
 
   const renderTodos = (status: string) => {
-    if (status === "all") {
-      let filtered = todos
-        .filter((todo) => !todo.deleted)
-        .map((todo) => (
-          <Task
-            key={todo.id}
-            todo={todo}
-            handlers={{ toggleCompletion, deleteTodo, openEditModal }}
-          />
-        ));
+    let filteredTodos = todos.filter((todo) => !todo.deleted);
 
-      setSelectedLength(filtered.length);
-      return filtered;
-    } else {
-      let filtered = todos
-        .filter(
-          (todo) =>
-            (status === "completed" ? todo.completed : !todo.completed) &&
-            !todo.deleted
-        )
-        .map((todo) => (
-          <Task
-            key={todo.id}
-            todo={todo}
-            handlers={{ toggleCompletion, deleteTodo, openEditModal }}
-          />
-        ));
-      setSelectedLength(filtered.length);
-      return filtered;
+    if (search.trim() !== "") {
+      filteredTodos = filteredTodos.filter((todo) =>
+        todo.text.toLowerCase().includes(search.trim().toLowerCase())
+      );
     }
+
+    if (status !== "all") {
+      filteredTodos = filteredTodos.filter((todo) =>
+        status === "completed" ? todo.completed : !todo.completed
+      );
+    }
+
+    setSelectedLength(filteredTodos.length);
+
+    return filteredTodos.map((todo) => (
+      <Task
+        key={todo.id}
+        todo={todo}
+        handlers={{ toggleCompletion, deleteTodo, openEditModal }}
+      />
+    ));
   };
 
   return (

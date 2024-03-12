@@ -38,7 +38,7 @@ export default function Task({ todo, handlers }: TaskProps) {
       <Card
         key={todo.id}
         sx={{
-          bgcolor: !todo.completed ? "white" : "#f0f0f0",
+          bgcolor: !todo.completed ? "primary" : "info.dark",
           borderRadius: 2,
           boxShadow: "0 2px 10px rgba(0, 0, 0, 0.1)",
           marginBottom: 2,
